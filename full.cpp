@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
 #include "windows.h"
-//#include "objects.h"
-//#include "functions.h"
 
 using namespace std;
 
