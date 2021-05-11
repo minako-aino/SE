@@ -106,8 +106,8 @@ class Pilot {
     string name;
     public:
         Pilot(string data) { name = data; }
-        void fly();
-        void land(Airplane& plane, Runway& runway);
+        void fly(Airplane& plane, RunwaySystem& rs, int i);
+        void land(Airplane& plane, RunwaySystem& rs, int i);
         int regist(AircraftCarrier& aircraft, int i);
         int checkID(AircraftCarrier& aircraft, int i);
         int reserve(AircraftCarrier& aircraft, int plane, int i);
@@ -241,7 +241,7 @@ void Sailor::action(AircraftCarrier& aircraft) {
         cin >> answ;
         switch(answ) {
             case 1: {
-                cout << " -> Current fuel state: " << check(aircraft.fuelsupplysystem);
+                cout << " -> Current fuel state: " << check(aircraft.fuelsupplysystem) << endl;
                 break; }
             case 2: {
                 if (aircraft.fuelsupplysystem.engine.checkstate()) stopengine(aircraft);
@@ -290,7 +290,6 @@ int Pilot::checknumber(AircraftCarrier& aircraft, int plane, int i) {
 }
 
 int Pilot::reserve(AircraftCarrier& aircraft, int plane, int i) {
-	//i = 4;
     if (i < 20) {
         aircraft.accountingsystem.RegisterBook[plane] = i;
         aircraft.runwaysystem.setrunwaystate(i, 1);
@@ -298,15 +297,35 @@ int Pilot::reserve(AircraftCarrier& aircraft, int plane, int i) {
     } else cout << "There are no available parking places\n";    
 }
 
-void Pilot::land(Airplane& plane, Runway& runway) {
-    if (runway.state == runway.states_list[1]) {
-        runway.state = runway.states_list[3];
-        cout << " -> Current runway state: " << runway.state << endl;
+void Pilot::land(Airplane& plane, RunwaySystem& rs, int i) {
+    if (rs.runways[i].state == rs.runways[i].states_list[1]) {
+        rs.setrunwaystate(i, 3);
+        cout << " -> Current runway state: " << rs.runways[i].state << endl;
         plane.state = "landing";
         cout << " -> Plane state: " << plane.state << endl;
         plane.state = "landed";
         cout << " -> Plane state: " << plane.state << endl;
+        rs.setrunwaystate(i, 0);
     } else cout << "Runway is not ready\n";
+}
+
+void Pilot::fly(Airplane& plane, RunwaySystem& rs, int i) {
+    if (rs.runways[i].state == rs.runways[i].states_list[0]) {
+        rs.setrunwaystate(i, 1);
+        cout << " -> Current runway state: " << rs.runways[i].state << endl; 
+    } else cout << "Runway is not ready\n";
+    if (rs.runways[i].state == rs.runways[i].states_list[1]) {
+        plane.fly();
+        rs.setrunwaystate(i, 0);
+        cout << " -> Current runway state: " << rs.runways[i].state << endl;
+    }
+}
+
+void Airplane::fly() {
+    state = "ready to take off";
+    cout << " -> Plane state: " << state << endl;
+    state = "flying";
+    cout << " -> Plane state: " << state << endl;
 }
 
 int AccountingSystem::setID(Airplane& airplane){
@@ -338,7 +357,6 @@ int main(){
     Sailor sailor("Anna Kyōyama");
     Captain captain("Yo Asakura");
     AircraftCarrier aircraft0;           
-//    Airplane plane;
     Pilot pilot01("Ren Tao");
     char ans;
     int planeID;
@@ -358,7 +376,8 @@ int main(){
         int i = 0;
         planeID = pilot01.checkID(aircraft0, i);
         pilot01.checknumber(aircraft0, planeID, i);
-        pilot01.land(aircraft0.planes[i], aircraft0.runwaysystem.runways[i]);
+        pilot01.land(aircraft0.planes[i], aircraft0.runwaysystem, i);
+        pilot01.fly(aircraft0.planes[i], aircraft0.runwaysystem, i);
         i++;
         cout << "Are you interested in other planes?\n";
         cin >> ans;
