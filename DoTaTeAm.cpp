@@ -14,6 +14,7 @@ class The_International;
 class Support;
 class Player;
 int stats;
+class DCP;
 
 string heroes_list[40] = {"Lina", "Monkey King", "Phantom Assasin", "Pudge", "Sniper", "Windranger", "Axe", "Bloodseeker", 
 "Crystal Maiden", "Bristleback", "Bounty Hunter", "Bane", "Broodmother", "Anti-Mage", "Abaddon", "Drow Ranger", "Invoker", 
@@ -130,8 +131,6 @@ class Team {
     public:
         bool is_full = false;
     	bool major_participation = false;
-        DPC dpc_invite;
-        The_International international_invite;
         Support support;
         Player team[5];
         int exp = 0;
@@ -319,10 +318,10 @@ class Coach {
     public:
         void team_sign(Team& team);
         void prepare_support(Team& team);
-        void DCP(Team& team);
+        void DCP(Team& team, DPC& dpc);
         void start_ananytics(Team& team);
         void change_player(Team& team);
-        void TI(Team& team);
+        void TI(Team& team, The_International& TI);
 };
 
 void Coach::team_sign(Team& team){
@@ -345,17 +344,17 @@ void Coach::prepare_support(Team& team){
     } 
 }
 
-void Coach::DCP(Team& team){
+void Coach::DCP(Team& team, DPC& dpc){
     cout << "Do you want to visit bootcamp?\n";
     cin >> answ;
     if (answ == 'y' || answ == 'Y'){
-        team.dpc_invite.bootcamp(team);
+        dpc.bootcamp(team);
     }
     
     cout << "Are you going to visit major?\n";
     cin >> answ;
     if (answ == 'y' || answ == 'Y'){
-        team.dpc_invite.major(team);
+        dpc.major(team);
         team.major_participation = true;
     }
 }
@@ -378,14 +377,14 @@ void Coach::change_player(Team& team){
     team.sign_members(player);
 }
 
-void Coach::TI(Team& team){
+void Coach::TI(Team& team, The_International& TI){
     int matches;
     // проверка на участие в турнире выше
     if (!team.major_participation) {
         cout << "You haven`t visited major, now it is a chance to\n";
         cout << "How many matches do you want to have?\n";
         cin >> matches;
-        team.international_invite.qualification(team, matches);
+        TI.qualification(team, matches);
         team.major_participation = true;
     }
 
@@ -395,16 +394,18 @@ void Coach::TI(Team& team){
         start_ananytics(team);
     }
 
-    team.international_invite.TI(team);
+    TI.TI(team);
 }
 
 int main(){
     Team team;
     Coach coach;
+    DPC dpc;
+    The_International international;
 
     coach.team_sign(team);
     coach.prepare_support(team);
-    coach.DCP(team);
+    coach.DCP(team, dpc);
     
     cout << "Do you need analytics?\n";
     cin >> answ;
@@ -418,7 +419,7 @@ int main(){
         coach.change_player(team);
     }
 
-    coach.TI(team);
+    coach.TI(team, international);
 
     return 0;
 }
